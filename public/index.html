@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>agent-runtime: состояние воркеров</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 1.5rem; background: #0b0d10; color: #e6e6e6; }
+    h1 { font-size: 1.1rem; margin: 0 0 1rem; }
+    h2 { font-size: 0.95rem; margin: 1.5rem 0 0.5rem; color: #9aa4af; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cards { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .card { background: #14171b; border: 1px solid #262b31; border-radius: 8px; padding: 0.75rem 1rem; min-width: 160px; }
+    .card .label { font-size: 0.7rem; color: #9aa4af; text-transform: uppercase; }
+    .card .value { font-size: 1.1rem; margin-top: 0.15rem; }
+    .badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-running, .badge-available, .badge-done, .badge-alive, .badge-completed, .badge-finished { background: #14361f; color: #6fdc8c; }
+    .badge-stopped, .badge-unavailable, .badge-dead, .badge-crashed, .badge-failed { background: #33222b; color: #e59aa8; }
+    .badge-blocked, .badge-quota_limited, .badge-hung { background: #3a2a12; color: #f0b45c; }
+    .badge-busy, .badge-in_progress, .badge-validating, .badge-starting { background: #16283a; color: #7cc0f2; }
+    button { background: #1c2229; color: #e6e6e6; border: 1px solid #333a42; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer; font-size: 0.85rem; }
+    button:hover { background: #262d35; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid #20252b; }
+    tr[data-task-row] { cursor: pointer; }
+    tr[data-task-row]:hover { background: #14171b; }
+    .filters { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+    .filters button[data-active="true"] { background: #26313c; border-color: #3d5468; }
+    #task-detail { white-space: normal; background: #14171b; border: 1px solid #262b31; border-radius: 8px; padding: 0.75rem; font-size: 0.82rem; max-height: 40vh; overflow: auto; }
+    #task-detail .detail-row { margin: 0.2rem 0; }
+    #task-detail .detail-label { color: #9aa4af; font-weight: 600; }
+    ul { margin: 0.25rem 0; padding-left: 1.1rem; font-size: 0.82rem; }
+    pre { background: #14171b; border: 1px solid #262b31; border-radius: 8px; padding: 0.75rem; font-size: 0.78rem; overflow: auto; max-height: 30vh; }
+    .error { color: #e59aa8; }
+  </style>
+</head>
+<body>
+  <h1>agent-runtime: состояние воркеров</h1>
+
+  <div id="status-cards" class="cards"></div>
+  <div class="filters" id="lifecycle-buttons">
+    <button type="button" data-action="start">СТАРТ</button>
+    <button type="button" data-action="stop">СТОП</button>
+  </div>
+  <div id="lifecycle-error" class="error"></div>
+
+  <h2>Воркеры</h2>
+  <table id="worker-table">
+    <thead>
+      <tr><th>Слот</th><th>Воркер</th><th>Задача</th><th>PID</th><th>Статус слота</th><th>Живость</th><th>Пульс</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Провайдеры и паузы по квоте</h2>
+  <div id="providers" class="cards"></div>
+
+  <h2>Задачи</h2>
+  <div class="filters" id="task-filters">
+    <button type="button" data-filter="all" data-active="true">ВСЕ</button>
+    <button type="button" data-filter="active">АКТИВНЫЕ</button>
+    <button type="button" data-filter="queued">В ОЧЕРЕДИ</button>
+    <button type="button" data-filter="done">ГОТОВО</button>
+    <button type="button" data-filter="blocked">ЗАБЛОКИРОВАНО</button>
+  </div>
+  <table id="task-table">
+    <thead>
+      <tr><th>ID</th><th>Название</th><th>Приоритет</th><th>Статус</th><th>Агент</th><th>Начата</th><th>Длительность</th><th>Попытки</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="task-detail"></div>
+
+  <h2>История рантайма</h2>
+  <ul id="history"></ul>
+
+  <h2>Журнал (хвост)</h2>
+  <pre id="log"></pre>
+
+  <script src="/i18n.js"></script>
+  <script src="/dashboard.js"></script>
+</body>
+</html>
