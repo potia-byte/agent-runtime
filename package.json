@@ -1,0 +1,26 @@
+{
+  "name": "agent-runtime",
+  "version": "0.1.0",
+  "description": "Observability and reliability primitives for long-running AI-agent workers: crash recovery, durable detached workers, atomic state files, quota classification, read-only dashboard.",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json",
+    "dashboard": "node --import tsx src/dashboard/index.ts",
+    "demo": "node --import tsx demo/demo.ts"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}
