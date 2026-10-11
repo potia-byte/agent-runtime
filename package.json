@@ -4,15 +4,18 @@
   "description": "Observability and reliability primitives for long-running AI-agent workers: crash recovery, durable detached workers, atomic state files, quota classification, read-only dashboard.",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json",
     "dashboard": "node --import tsx src/dashboard/index.ts",
-    "demo": "node --import tsx demo/demo.ts"
+    "demo": "node --import tsx demo/demo.ts",
+    "start": "node dist/dashboard/index.js"
   },
   "dependencies": {
     "zod": "^4.0.0"
