@@ -1,8 +1,9 @@
 # agent-runtime
 
-**English summary.** A small TypeScript library plus a read-only dashboard for
-keeping long-running AI-agent workers observable and recoverable on a single
-machine. It covers: detached workers that survive an orchestrator crash,
+**English summary.** A small TypeScript library plus a dashboard with
+read-only state views and optional Start/Stop lifecycle actions for keeping
+long-running AI-agent workers observable and recoverable on a single machine.
+It covers: detached workers that survive an orchestrator crash,
 restart recovery that never frees a live worker or removes a workspace it
 cannot prove it owns, atomic JSON state files with retry on Windows
 EPERM/EBUSY, heuristic quota/rate-limit classification of process output,
@@ -48,7 +49,7 @@ flowchart LR
   subgraph Runner["Detached runner (отдельный процесс)"]
     P[рабочая команда]
   end
-  D[Dashboard<br/>node:http, read-only]
+  D[Dashboard<br/>просмотр + опциональные Старт/Стоп]
 
   L -->|job.json, input.txt| JD
   L -->|spawn detached| Runner
@@ -63,6 +64,21 @@ flowchart LR
   D -->|читает| LG
   D -->|liveness| JD
 ```
+
+Дашборд показывает снимок состояния runtime, воркеры и их живость, статусы
+провайдеров, задачи и их детали, историю и хвост лога. Эти данные отдаются
+через `GET /api/status`, `/api/workers`, `/api/providers`, `/api/tasks`,
+`/api/tasks/:id`, `/api/history` и `/api/log`; слой чтения каждый раз читает
+`runtime.json` и `ledger.json` с диска и их не изменяет.
+
+Помимо просмотра есть два опциональных действия: `POST /api/lifecycle/start`
+запускает настроенную команду только при заданном
+`AGENT_RUNTIME_START_COMMAND` (и отказывает, если runtime уже жив), а
+`POST /api/lifecycle/stop` посылает `SIGTERM` живому pid из `runtime.json`.
+Сервер привязан к `127.0.0.1`; обработчик принимает только локальные значения
+`Host` с портом (`127.0.0.1`, `localhost` или `[::1]`). Для не-GET-запроса с
+заголовком `Origin` его host должен совпадать с `Host`; иначе запрос
+отклоняется.
 
 Жизненный цикл воркера:
 
@@ -218,10 +234,11 @@ flowchart LR
   или macOS не запускались.
 - **Классификация квоты — регулярные выражения** по англоязычным
   сообщениям; другие провайдеры и языки могут не распознаться.
-- **Дашборд без аутентификации** (только loopback) и опрос раз в 3 с,
-  без push. Кнопка «Старт» работает, только если задан
-  `AGENT_RUNTIME_START_COMMAND`; «Стоп» шлёт `SIGTERM` pid из
-  `runtime.json`.
+- **Дашборд без аутентификации**: сервер слушает только `127.0.0.1`,
+  обработчик проверяет локальный `Host`, а у не-GET-запроса с `Origin`
+  сверяет его с `Host`. Опрос раз в 3 с, без push. Кнопка «Старт» работает,
+  только если задан `AGENT_RUNTIME_START_COMMAND`; «Стоп» шлёт `SIGTERM` pid
+  из `runtime.json`.
 - **Отображение живости воркеров в дашборде** — новая надстройка над
   существующими предикатами recovery (в исходном дашборде слотов не было).
 - Heartbeat 20 с и стартовый grace 60 с — константы, не настройки.
